@@ -1,0 +1,75 @@
+select staff.staffname,dept.deptname       -------normal inner join
+from staff,dept
+where staff.deptid = dept.deptid 
+
+
+
+select staff.staffname,dept.deptname    -------left outer join
+from staff left outer join dept             * instead of " , =left outer join"
+on staff.deptid = dept.deptid               * instead of where = on
+
+
+select productname from product 
+where product.bkcolor='red' or  product.bkcolor='Green'or  product.bkcolor='Blue' 
+and 
+product.ftcolor<>'blue'
+
+-----------------------------------------------------------------
+select productname from product 
+where product.bkcolor in ('red','Green', 'Blue')
+and 
+product.ftcolor<>'blue'
+
+-----------------------------------------------------------------
+
+select productid,productname,productprice,productcategory from NB
+where productcategory in('Electronics','Clothing','Furnitures','Books')
+union 
+select productid,productname,productprice,productcategory from SB
+where productprice >20000
+                                      
+-----------------------------------------------------------
+
+select fathername,mothername from parents where parentid  in
+(
+select parentid from parents where parent.studentid=student.studentid in
+(select studentid from students where student.marks<30)
+)
+
+----------------------------------------------------------
+
+
+select studentid from marks where student.marks<30 
+groupby studentid
+having count(studentid)>1
+
+----------------------------------------------------------
+
+select parentid from students
+group by parentidid
+having count(parentid) > 2
+
+--------------------------------------------------------
+
+
+select studentname 
+ from students
+ where parentid
+in
+(
+select parentid from parents 
+where parentname
+in
+(select staffname from staff)
+)
+
+
+----------------------------------------------------
+
+
+staff 
+parent
+student
+attendance
+marks
+

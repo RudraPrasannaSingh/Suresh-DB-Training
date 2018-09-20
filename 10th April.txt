@@ -1,0 +1,31 @@
+select student.studentname,marks.score
+from student,marks left outer join
+on st.sid
+
+
+
+---union is used for no relation between table
+
+---join is used when relation between table
+
+
+
+
+SubQuery in a column
+
+select e.eid,e.name,e.city,
+(Select m.name from employee m where m.id=e.mid) managername
+from employee e
+
+Self Join
+
+select e.id,e.name,e.city, m.name
+from employee e,employee m 
+where e.mid=m.id
+
+
+
+
+
+
+

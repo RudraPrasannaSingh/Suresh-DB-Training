@@ -1,0 +1,69 @@
+
+select m.PlotID
+from Plots m
+where m.length = 20
+and m.width = 10
+and m.facing = 'west'
+and m.plotstatus = 'ForSale'
+and
+10000000 >
+(
+   select ((p.Length * p.Width * c.CostPerSqFt) + 
+   (case p.Facing 
+   when 'East' then c.CostForEastFacing 
+   when 'West' then c.CostForWestFacing
+   when 'South' then c.CostForSouthFacing
+   when 'North' then c.CostForNorthFacing
+   end))
+   from Plots p, Configurations c
+   where p.PlotID =  m.plotID
+)
+-------------------------------------------------------------------------------------------------------
+select c.CustomerID,datepart(d,t.TransactionDate) as date,count(t.TransactionID) as NoOfTransactions
+from Customers c,Transactions t
+where c.CustomerID=t.CustomerID
+group by c.CustomerID,datepart(d,t.TransactionDate)
+
+
+select c.CustomerID,datepart(d,t.TransactionDate) as date,count(t.TransactionID) as NoOfTransactions
+from Customers c,Transactions t
+where c.CustomerID=t.CustomerID
+group by c.CustomerID,datepart(d,t.TransactionDate)
+having count(t.TransactionID)>15
+
+------------------------------------------------------------------------------------------------------------
+
+
+insert into Notifications(NotificationNumber,notificationmessage,NotificationStatus)
+
+select Customers.NotificationNumber, tblCustomer.notificationmessage,'sent' as NotificationStatus
+from
+(
+select c.CustomerID, 'you have made ' + convert(varchar(10), count(t.TransactionID)) + ' No Of Transactions on '+ convert(varchar(10),datepart(d,t.TransactionDate)) as notificationmessage
+from Customers c,Transactions t
+where c.CustomerID=t.CustomerID
+group by c.CustomerID,datepart(d,t.TransactionDate)
+having count(t.TransactionID)>15
+) tblCustomer, Customers
+where tblCustomer.CustomerID = Customers.CustomerID 
+
+-------------------------------------------------------------------------------------------------------------
+
+
+with tblCustomer_CTE (CustomerID,NotificationMessage) as
+(
+select c.CustomerID, 'you have made ' + convert(varchar(10), count(t.TransactionID)) + ' No Of Transactions on '+ convert(varchar(10),datepart(d,t.TransactionDate)) as notificationmessage
+from Customers c,Transactions t
+where c.CustomerID=t.CustomerID
+group by c.CustomerID,datepart(d,t.TransactionDate)
+having count(t.TransactionID)>15
+)
+select Customers.NotificationNumber, tblCustomer_CTE.notificationmessage
+from tblCustomer_CTE , Customers
+where tblCustomer_CTE.CustomerID = Customers.CustomerID 
+union all
+select Customers.NotificationNumber, tblCustomer_CTE.notificationmessage
+from tblCustomer_CTE , Customers
+where tblCustomer_CTE.CustomerID = Customers.CustomerID 
+select Customers.*
+from Customers

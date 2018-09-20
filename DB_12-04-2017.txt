@@ -1,0 +1,76 @@
+/*1.read the customer preference(facing,length,width,budget)
+2.check the availability of plots, amount within budget
+3.registration
+5.EC papers
+*/
+alter procedure proc_registerplot as
+begin
+declare @CustomerID int
+Declare @Length int
+Declare @Width int
+Declare @Facing varchar(50)
+Declare @PlotID int
+
+select top 1 @PlotID = PlotID
+from Plots
+where length = @Length 
+and width = @Width 
+and facing = @Facing 
+and PlotStatus = 'ForSale'
+
+
+select (p.Length * p.Width * c.CostPerSqFt) + 
+(case p.Facing 
+when 'East' then c.CostForEastFacing 
+when 'West' then c.CostForWestFacing
+when 'South' then c.CostForSouthFacing
+when 'North' then c.CostForNorthFacing
+end) 
+from Plots p, Configurations c
+where p.PlotID = @PlotID
+
+
+
+
+
+--5.
+select PlotID, CustomerID, PlotNumber,PlotStatus,Length,Width 
+from Plots
+
+
+end
+
+exec proc_registerplot
+
+Configurations
+ConfigID
+CostPerSqFt
+CostForEastFacing
+CostForNorthFacing
+CostForSouthFacing
+CostForWestFacing
+
+Plots
+PlotID
+CustomerID
+PlotNumber
+PlotStatus
+Facing
+Length
+Width
+
+Customers
+CustomerID
+CustomerName
+ContactNumber
+Address
+
+Registrations
+RegistrationID
+PlotID
+CustomerID
+RegistrationDate
+RegistrationAmount
+
+
+

@@ -1,0 +1,80 @@
+DBs:
+1)BusTicketBooking
+2)Hospital
+-------------------------------------------------------------------------------------------------------------------------------------------------
+SPs:
+1)IssueBook --
+2)ReturnBook --
+3)SendRemainder --
+4)AddNewMember
+5)AddNewBook
+6)AddPenalty
+7)Renew Membership
+----------------------------------------------------------------------------------------------------
+Create Procedure proc_issuebook(@MemberID int,@BookID int) as
+Begin
+Declare @ContactNumber numeric(18,0)
+if not exists(select MemberID
+from Memberships
+where MemberID = @MemberID)
+raiserror('Member is not found',18,2)
+else
+ Begin
+ if not exists(select BookID
+ from Books
+ where BookID = @BookID)
+ raiserror('Book is not found',18,2)
+ else
+  Begin
+  
+  insert into Register(MemberID,BookID,IssueDate,Status)
+  values (@MemberID,@BookID,GETDATE(),'Issued')
+
+  select @ContactNumber = ContactNumber
+  from Memberships
+  where MemberID = @MemberID
+
+  insert into Notifications(NotificationNumber,
+  NotificationMessage,NotificationStatus)
+  values (@ContactNumber,'The Book has been Issued on' +
+  convert(varchar(20),GETDATE()) +
+  'Pls return the book within 15 days to avoid penalty','Success')
+
+  End
+ End
+End
+-------------------------------------------------------------------------------------------------------------
+Create procedure proc_returnbook(@MemberID int,@BookID int) as
+Begin
+Declare @ContactNumber numeric(18,0)
+update Register
+set ReturnDate = GETDATE(),
+Status = 'Returned'
+where MemberID = @MemberID and BookID = @BookID
+
+select @ContactNumber = ContactNumber
+  from Memberships
+  where MemberID = @MemberID
+
+  insert into Notifications(NotificationNumber,
+  NotificationMessage,NotificationStatus)
+  values (@ContactNumber,'The Book has been Returned on' +
+  convert(varchar(20),GETDATE()) +
+  ' Thanks for returning the book','Success')
+
+End
+-----------------------------------------------------------------------------------------------------------------
+Create procedure proc_sendremainder as
+Begin
+insert into Notifications(NotificationNumber, NotificationMessage,NotificationStatus)
+select m.ContactNumber,'please return the book issued on ' +convert(varchar(10), r.IssueDate,105),'SMS Alert'
+from Register r,Memberships m
+where r.MemberID = m.MemberID 
+and GETDATE() - r.IssueDate > 15
+
+ 
+End
+
+select
+
+exec proc_sendremainder

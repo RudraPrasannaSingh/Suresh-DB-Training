@@ -1,0 +1,85 @@
+--Bank withdraw transaction
+--1.Get account details and the withdraw amount (read)
+--2.Check Bank cash availability (check)
+--3.Authorise the account (check)
+--4.Check the (min)balance (check)
+--5.Withdraw (activity: update the account balance)
+--6.Send message (notification)
+--7.Update passbook (generate report)
+/*
+--execution parameters:
+exec prc_withdraw '15154278789', 6000
+
+expected output:
+TransactionDate			AccountNoWithdrawAmount	AccountBalanceAmount	
+2017-04-11 16:18:05.430	15154278789	6000	45,00000
+
+*/
+--1.
+create procedure prc_withdraw 
+(
+@AccountNo int,
+@WithdrawAmount numeric(10,2)
+) as
+begin
+declare @NotificationMobileNumber varchar(20)
+declare @AccountBalanceAmount numeric(10,2)
+declare @LedgerBalanceAmount numeric(10,2)
+
+declare @AccountStatus varchar(30)
+
+declare @BranchID  varchar(20)
+set @BranchID= 'BH123'
+declare @MinimumAccountBalance numeric(10,2)
+set @MinimumAccountBalance= 500
+
+--2.
+select @LedgerBalanceAmount = LedgerBalanceAmount
+from BankLedger
+where BranchID = @BranchID
+
+if (@LedgerBalanceAmount < @WithdrawAmount)
+RAISERROR('No cash in Bank',10,1)
+--3.
+select @AccountStatus = AccountStatus, @AccountBalanceAmount = AccountBalanceAmount
+from customers
+where AccountNo = @AccountNo
+
+if (@AccountStatus <> 'Active')
+RAISERROR('Account: %s is not active.',10,1, @AccountNo)
+
+--4.
+if (@AccountBalanceAmount < @WithdrawAmount + @MinimumAccountBalance)
+RAISERROR('No sufficient funds in account: %s.',10,1, @AccountNo)
+
+--5.
+update customers
+set AccountBalanceAmount = AccountBalanceAmount - @WithdrawAmount
+where AccountNo = @AccountNo
+
+--6.
+select @NotificationMobileNumber = NotificationMobileNumber, 
+       @AccountBalanceAmount = AccountBalanceAmount
+from customers
+where AccountNo = @AccountNo
+
+insert into transactions(accountnumber,transactiondate,transactiontype,transactionamount,balanceamount)
+values(@AccountNo,getdate(),'Debit',@WithdrawAmount,@AccountBalanceAmount)
+
+insert into notifications(NotificationNumber, NotificationMessage)
+values (@NotificationMobileNumber,'your account debited by ' + @WithdrawAmount  +' and the balance is ' + @AccountBalanceAmount)
+
+--7.
+select getdate() as TransactionDate, AccountNo, 
+@WithdrawAmount as WithdrawAmount, 
+AccountBalanceAmount
+from customers
+where AccountNo = @AccountNo
+
+/*
+select getdate() as TransactionDate, '15154278789' as AccountNo, 
+6000 as WithdrawAmount, 
+4500000 as AccountBalanceAmount
+*/
+
+end --prc_withdraw

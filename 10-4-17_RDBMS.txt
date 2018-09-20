@@ -1,0 +1,123 @@
+SELECT e.id,e.name, e.city, e.mid
+FROM employee e
+
+
+SELECT e.id,e.name, e.city, (select m.name 
+							from employee m 
+							where m.id = e.mid) managername
+FROM employee e
+
+select e.id, e.name, e.city, m.name 
+from employee e, employee m
+where e.mid = m.id
+
+select e.id, e.name, e.city, m.name 
+from employee e left outer join employee m
+on  e.mid = m.id
+
+
+
+
+
+select e1.name, e1.dob
+from employee e1
+
+
+select e1.name, e1.dob, e2.name, e2.dob
+from employee e1, employee e2
+where 
+e1.id <> e2.id and
+datepart(m, e1.dob) = datepart(m, e2.dob) and
+datepart(d, e1.dob) = datepart(d, e2.dob)
+
+========================================================================================================
+
+
+--Declaration
+Declare @x varchar(100)
+Declare @y varchar(100)
+declare @t varchar(100)
+--initialisation
+set @x = 'Aravind'
+set @y = 'Rudra'
+--output
+print 'x value is = ' + @x
+print 'y value is = ' + @y
+--swap
+set @t = @x
+set @x = @y
+set @y = @t
+--output
+print 'x value is = ' + @x
+print 'y value is = ' + @y
+
+
+
+
+alter procedure proc_swap(@x varchar(100), @y varchar(100))  as
+begin
+--Declaration
+declare @t varchar(100)
+--output
+print 'x value is = ' + @x
+print 'y value is = ' + @y
+--swap
+set @t = @x
+set @x = @y
+set @y = @t
+--output
+print 'x value is = ' + @x
+print 'y value is = ' + @y
+end
+
+======================================================================================================
+exec proc_swap 'MBA','MCA'  
+exec proc_swap 12,21
+exec proc_swap 'Dell','Lenovo' 
+
+
+declare @x nvarchar(10)
+set @x = 'abc'
+select @x
+
+select fp.productid, fp.productname, sp.productid, sp.productname
+from products fp, products sp
+where fp.vendor = sp.vendor
+
+
+
+
+select * 
+from products
+
+
+select p1.ProductName, p2.ProductName , P2.Vendor
+from products p1, products p2
+where p1.ProductID <> p2.ProductID
+and P1.vendor = P2.vendor
+
+========================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
